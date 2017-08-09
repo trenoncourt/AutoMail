@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Automail.Api.Dtos;
 using Automail.Api.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,6 +40,27 @@ namespace Automail.Api
                 .Configure(app =>
                 {
                     app.ConfigureCors(appSettings);
+
+                    app.UseRouter(r =>
+                    {
+                        r.MapPost("tt", async context =>
+                        {
+                            var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
+                            if (body == null) return;
+ 
+                            await contactRepo.Add(newContact);
+ 
+                            response.StatusCode = 201;
+                            await response.WriteJson(newContact);
+                        });
+
+                        r.MapGet("contacts", async (context) => 
+                        {
+                            context.Response.WriteJson()
+                            var contacts = await contactRepo.GetAll();
+                            await response.WriteJson(contacts);
+                        });
+                    });
                 })
                 .Build();
 
