@@ -43,22 +43,15 @@ namespace Automail.Api
 
                     app.UseRouter(r =>
                     {
-                        r.MapPost("tt", async context =>
+                        r.MapPost("send", async context =>
                         {
                             var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                            if (body == null) return;
- 
-                            await contactRepo.Add(newContact);
- 
-                            response.StatusCode = 201;
-                            await response.WriteJson(newContact);
-                        });
-
-                        r.MapGet("contacts", async (context) => 
-                        {
-                            context.Response.WriteJson()
-                            var contacts = await contactRepo.GetAll();
-                            await response.WriteJson(contacts);
+                            if (body == null)
+                            {
+                                context.Response.StatusCode = 400;
+                                return;
+                            }
+                            context.Response.StatusCode = 201;
                         });
                     });
                 })
