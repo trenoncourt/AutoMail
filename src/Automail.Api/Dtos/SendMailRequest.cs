@@ -6,6 +6,8 @@
         /// Sender email adress.
         /// </summary>
         public string From { get; set; }
+
+        public string FromName { get; set; }
         
         /// <summary>
         /// Recipient email address(es).

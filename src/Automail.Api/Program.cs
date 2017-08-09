@@ -2,12 +2,15 @@
 using System.IO;
 using Automail.Api.Dtos;
 using Automail.Api.Extensions;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 
 namespace Automail.Api
 {
@@ -51,7 +54,25 @@ namespace Automail.Api
                                 context.Response.StatusCode = 400;
                                 return;
                             }
+                            var emailMessage = new MimeMessage();
+                            emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
+                            emailMessage.To.Add(new MailboxAddress("", body.To));
+                            emailMessage.Subject = body.Subject;
+                            emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
+                            
+                            using (var client = new SmtpClient())
+                            {
+                                client.LocalDomain = appSettings.Smtp.LocalDomain;                
+                                await client.ConnectAsync(appSettings.Smtp.Host, appSettings.Smtp.Port, appSettings.Smtp.SecureSocketOptions).ConfigureAwait(false);
+                                if (appSettings.Smtp.User != null && appSettings.Smtp.Password != null)
+                                {
+                                    client.Authenticate(appSettings.Smtp.User, appSettings.Smtp.Password);
+                                }
+                                await client.SendAsync(emailMessage).ConfigureAwait(false);
+                                await client.DisconnectAsync(true).ConfigureAwait(false);
+                            }
                             context.Response.StatusCode = 201;
+                            
                         });
                     });
                 })
