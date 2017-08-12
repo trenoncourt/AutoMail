@@ -26,6 +26,7 @@ namespace Automail.Api
             
             var host = new WebHostBuilder()
                 .UseKestrel()
+                .UseIISIntegration()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureLogging(loggerFactory =>
                 {
