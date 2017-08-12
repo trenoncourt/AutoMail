@@ -39,3 +39,22 @@ Exemple of appsettings.json
 ```
 
 More settings will come.
+
+## API
+### POST /send
+Sends an email.
+
+**Body**
+- ```from:``` The origin email adress
+- ```fromName:``` The origin name
+- ```to:``` The destination email address
+- ```subject:``` The subject of the message
+- ```body:``` The message body
+- ```isHtml:``` Define if the body is html
+
+## Auth
+Soon...
+
+
+## Buy me a beer
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/trenoncourt/5)
