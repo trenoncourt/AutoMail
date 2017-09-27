@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using System.ComponentModel.DataAnnotations;
 
 namespace Automail.Api
 {
@@ -54,11 +55,12 @@ namespace Automail.Api
                                 context.Response.StatusCode = 400;
                                 return;
                             }
+                            var emailChecker = new EmailAddressAttribute();
                             var emailMessage = new MimeMessage();
                             emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
                             foreach (string to in body.To.Split(';'))
                             {
-                                if (string.IsNullOrWhiteSpace(to))
+                                if (!emailChecker.IsValid(to))
                                 {
                                     continue;
                                 }
