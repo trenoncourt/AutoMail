@@ -56,8 +56,14 @@ namespace Automail.Api
                             }
                             var emailMessage = new MimeMessage();
                             emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
-                            foreach(string to in body.To.Split(';'))
+                            foreach (string to in body.To.Split(';'))
+                            {
+                                if (string.IsNullOrWhiteSpace(to))
+                                {
+                                    continue;
+                                }
                                 emailMessage.To.Add(new MailboxAddress("", to));
+                            }
                             emailMessage.Subject = body.Subject;
                             emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
                             
