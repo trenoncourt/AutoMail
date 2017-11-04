@@ -3,7 +3,6 @@ using System.IO;
 using Automail.Api.Dtos;
 using Automail.Api.Extensions;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -12,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Automail.Api
 {
@@ -24,7 +24,7 @@ namespace Automail.Api
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables().Build();
             AppSettings appSettings = config.Get<AppSettings>();
-            
+
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -49,39 +49,47 @@ namespace Automail.Api
                     {
                         r.MapPost("send", async context =>
                         {
-                            var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                            if (body == null)
+                            try
                             {
-                                context.Response.StatusCode = 400;
-                                return;
-                            }
-                            var emailChecker = new EmailAddressAttribute();
-                            var emailMessage = new MimeMessage();
-                            emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
-                            foreach (string to in body.To.Split(';'))
-                            {
-                                if (!emailChecker.IsValid(to))
+                                var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
+                                if (body == null)
                                 {
-                                    continue;
+                                    context.Response.StatusCode = 400;
+                                    return;
                                 }
-                                emailMessage.To.Add(new MailboxAddress("", to));
-                            }
-                            emailMessage.Subject = body.Subject;
-                            emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
-                            
-                            using (var client = new SmtpClient())
-                            {
-                                client.LocalDomain = appSettings.Smtp.LocalDomain;                
-                                await client.ConnectAsync(appSettings.Smtp.Host, appSettings.Smtp.Port, appSettings.Smtp.SecureSocketOptions).ConfigureAwait(false);
-                                if (appSettings.Smtp.User != null && appSettings.Smtp.Password != null)
+                                var emailChecker = new EmailAddressAttribute();
+                                var emailMessage = new MimeMessage();
+                                emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
+                                foreach (string to in body.To.Split(';'))
                                 {
-                                    client.Authenticate(appSettings.Smtp.User, appSettings.Smtp.Password);
+                                    if (!emailChecker.IsValid(to))
+                                    {
+                                        continue;
+                                    }
+                                    emailMessage.To.Add(new MailboxAddress("", to));
                                 }
-                                await client.SendAsync(emailMessage).ConfigureAwait(false);
-                                await client.DisconnectAsync(true).ConfigureAwait(false);
+                                emailMessage.Subject = body.Subject;
+                                emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
+
+                                using (var client = new SmtpClient())
+                                {
+                                    client.LocalDomain = appSettings.Smtp.LocalDomain;
+                                    await client.ConnectAsync(appSettings.Smtp.Host, appSettings.Smtp.Port, appSettings.Smtp.SecureSocketOptions).ConfigureAwait(false);
+                                    if (appSettings.Smtp.User != null && appSettings.Smtp.Password != null)
+                                    {
+                                        client.Authenticate(appSettings.Smtp.User, appSettings.Smtp.Password);
+                                    }
+                                    await client.SendAsync(emailMessage).ConfigureAwait(false);
+                                    await client.DisconnectAsync(true).ConfigureAwait(false);
+                                }
+                                context.Response.StatusCode = 201;
                             }
-                            context.Response.StatusCode = 201;
-                            
+                            catch (Exception e)
+                            {
+                                context.Response.StatusCode = 500;
+                                await context.Response.WriteAsync("{\"error\": \"" + e.Message + "\"}");
+                            }
+
                         });
                     });
                 })
