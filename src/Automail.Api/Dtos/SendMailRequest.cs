@@ -15,6 +15,11 @@
         public string To { get; set; }
 
         /// <summary>
+        /// Cc email address(es).
+        /// </summary>
+        public string Cc { get; set; }
+
+        /// <summary>
         /// Email subject.
         /// </summary>
         public string Subject { get; set; }
