@@ -3,7 +3,6 @@ using System.IO;
 using Automail.Api.Dtos;
 using Automail.Api.Extensions;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-using System.ComponentModel.DataAnnotations;
 
 namespace Automail.Api
 {
@@ -55,17 +53,10 @@ namespace Automail.Api
                                 context.Response.StatusCode = 400;
                                 return;
                             }
-                            var emailChecker = new EmailAddressAttribute();
                             var emailMessage = new MimeMessage();
                             emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
-                            foreach (string to in body.To.Split(';'))
-                            {
-                                if (!emailChecker.IsValid(to))
-                                {
-                                    continue;
-                                }
-                                emailMessage.To.Add(new MailboxAddress("", to));
-                            }
+                            emailMessage.To.AddAdresses(body.To);
+                            emailMessage.Cc.AddAdresses(body.Cc);
                             emailMessage.Subject = body.Subject;
                             emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
                             
@@ -81,7 +72,6 @@ namespace Automail.Api
                                 await client.DisconnectAsync(true).ConfigureAwait(false);
                             }
                             context.Response.StatusCode = 201;
-                            
                         });
                     });
                 })
