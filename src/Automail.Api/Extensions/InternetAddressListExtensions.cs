@@ -7,6 +7,9 @@ namespace Automail.Api.Extensions
     {
         public static void AddAdresses(this InternetAddressList internetAddressList, string addresses)
         {
+            if (string.IsNullOrEmpty(addresses))
+                return;
+
             var emailChecker = new EmailAddressAttribute();
             foreach (string adress in addresses.Split(';'))
             {
