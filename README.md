@@ -4,10 +4,10 @@ AutoMail is a tiny REST API to send mails based on the [MailKit](https://github.
 ## Installation
 Download the [last release](https://github.com/trenoncourt/AutoMail/releases) and place it on your server.
 
-You can download version **1.1.0** [here](https://github.com/trenoncourt/AutoMail/releases/download/1.1.0/AutoMail-1.1.0.zip)
+You can download version **1.1.1** [here](https://github.com/trenoncourt/AutoMail/releases/download/1.1.1/AutoMail-1.1.1.zip)
 
 AutoMail is designed to be as light as possible so it does not contains the *Microsoft.AspNetCore.Server.IISIntegration* package.
-If you want to use it on **IIS**, download the **iis-1.1.0** version from [here](https://github.com/trenoncourt/AutoMail/releases/download/1.1.0/AutoMail-iis-1.1.0.zip)
+If you want to use it on **IIS**, download the **iis-1.1.1** version from [here](https://github.com/trenoncourt/AutoMail/releases/download/1.1.1/AutoMail-iis-1.1.1.zip)
 
 ## Configuration
 All the configuration can be made in environment variable or appsettings.json file :
