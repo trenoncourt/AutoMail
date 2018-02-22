@@ -23,6 +23,10 @@ namespace Automail.Api
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables().Build();
             AppSettings appSettings = config.Get<AppSettings>();
+            if (!appSettings.IsValid())
+            {
+                throw new Exception("Please add all mandatory fields in settings.");
+            }
 
             var builder = new WebHostBuilder();
 
@@ -59,30 +63,15 @@ namespace Automail.Api
                             try
                             {
                                 var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                                if (body == null)
+                                if (body == null || !body.IsValid())
                                 {
                                     context.Response.StatusCode = 400;
                                     return;
                                 }
-                                var emailMessage = new MimeMessage();
-                                emailMessage.From.Add(new MailboxAddress(body.FromName ?? body.From, body.From));
-                                emailMessage.To.AddAdresses(body.To);
-                                emailMessage.Cc.AddAdresses(body.Cc);
-                                emailMessage.Subject = body.Subject;
-                                emailMessage.Body = new TextPart(body.IsHtml ? "html" : "plain") { Text = body.Body };
-
-                                using (var client = new SmtpClient())
-                                {
-                                    client.LocalDomain = appSettings.Smtp.LocalDomain;
-                                    await client.ConnectAsync(appSettings.Smtp.Host, appSettings.Smtp.Port, appSettings.Smtp.SecureSocketOptions).ConfigureAwait(false);
-                                    if (appSettings.Smtp.User != null && appSettings.Smtp.Password != null)
-                                    {
-                                        client.Authenticate(appSettings.Smtp.User, appSettings.Smtp.Password);
-                                    }
-                                    await client.SendAsync(emailMessage).ConfigureAwait(false);
-                                    await client.DisconnectAsync(true).ConfigureAwait(false);
-                                }
-                                context.Response.StatusCode = 201;
+                                
+                                var emailMessage = body.ToMimeMessage();
+                                await emailMessage.SendAsync(appSettings);
+                                context.Response.StatusCode = 204;
                             }
                             catch (Exception e)
                             {

@@ -1,4 +1,7 @@
-﻿namespace Automail.Api.Dtos.Requests
+﻿using Automail.Api.Extensions;
+using MimeKit;
+
+namespace Automail.Api.Dtos.Requests
 {
     public class SendMailRequest
     {
@@ -33,5 +36,24 @@
         /// Define if mail is html.
         /// </summary>
         public bool IsHtml { get; set; }
+    }
+
+    public static class SendMailRequestExtensions
+    {
+        public static MimeMessage ToMimeMessage(this SendMailRequest dto)
+        {
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress(dto.FromName ?? dto.From, dto.From));
+            emailMessage.To.AddAdresses(dto.To);
+            emailMessage.Cc.AddAdresses(dto.Cc);
+            emailMessage.Subject = dto.Subject;
+            emailMessage.Body = new TextPart(dto.IsHtml ? "html" : "plain") { Text = dto.Body };
+            return emailMessage;
+        }
+
+        public static bool IsValid(this SendMailRequest dto)
+        {
+            return !string.IsNullOrEmpty(dto.To) && !string.IsNullOrEmpty(dto.From);
+        }
     }
 }

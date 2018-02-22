@@ -58,4 +58,12 @@ namespace Automail.Api
     {
         public bool UseIIS { get; set; }
     }
+    
+    public static class AppSettingsExtensions
+    {
+        public static bool IsValid(this AppSettings settings)
+        {
+            return !string.IsNullOrEmpty(settings.Smtp.Host) && settings.Smtp.Port != 0;
+        }
+    }
 }

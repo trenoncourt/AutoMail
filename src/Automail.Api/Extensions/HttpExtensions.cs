@@ -45,7 +45,6 @@ namespace Automail.Api.Extensions
                         return model;
                     }
 
-                    httpContext.Response.StatusCode = 400;
                     await httpContext.WriteResponseBodyAsync(results);
 
                     return default(T);
