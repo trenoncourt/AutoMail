@@ -12,20 +12,20 @@ If you want to use it on **IIS**, download the **iis-1.1.1** version from [here]
 ## Configuration
 All the configuration can be made in environment variable or appsettings.json file :
 
-| Name              | Description                                   | Type        | Default value |
-| ----------------- | --------------------------------------------- | ----------- |--------------:|
-| **Cors**          | Cors settings                                 | Object      |               |
-| Cors.Enabled      | Define if cors are enabled                    | Boolean     | false         |
-| Cors.Methods      | Adds specific methods to the policy           | String      | *             |
-| Cors.Origins      | Adds specific origins to the policy           | String      | *             |
-| Cors.Headers      | Adds specific headers to the policy           | String      | *             |
-| **Smtp**          | Smtp settings                                 | Object      |               |
-| Smtp.Host\*       | The host name to connect to                   | String      |               |
-| Smtp.Port\*       | The port to connect to                        | Number      |               |
-| Smtp.User         | The user name to authenticate                 | String      |               |
-| Smtp.Password     | The password to authenticate                  | String      |               |
-| Smtp.Security     | The security to use (None, Auto, Tls or Ssl)  | String      | None          |
-| Smtp.LocalDomain  | The local domain used in the HELO or EHLO     | String      |               |
+| Name                | Description                                   | Type        | Default value |
+| ------------------- | --------------------------------------------- | ----------- |--------------:|
+| **Cors**            | Cors settings                                 | Object      |               |
+| Cors.`Enabled`      | Define if cors are enabled                    | Boolean     | false         |
+| Cors.`Methods`      | Adds specific methods to the policy           | String      | *             |
+| Cors.`Origins`      | Adds specific origins to the policy           | String      | *             |
+| Cors.`Headers`      | Adds specific headers to the policy           | String      | *             |
+| **Smtp**            | Smtp settings                                 | Object      |               |
+| Smtp.`Host`         | (**Required**) The host name to connect to    | String      |               |
+| Smtp.`Port`         | (**Required**) The port to connect to         | Number      |               |
+| Smtp.`User`         | The user name to authenticate                 | String      |               |
+| Smtp.`Password`     | The password to authenticate                  | String      |               |
+| Smtp.`Security`     | The security to use (None, Auto, Tls or Ssl)  | String      | None          |
+| Smtp.`LocalDomain`  | The local domain used in the HELO or EHLO     | String      |               |
 
 Exemple of appsettings.json
 ```json
@@ -45,15 +45,18 @@ More settings will come.
 Sends an email.
 
 **Body**
-- ```from*:``` The origin email adress
-- ```fromName:``` The origin name
-- ```to*:``` The destination email address(es)
-- ```cc:``` The cc email address(es)
-- ```subject:``` The subject of the message
-- ```body:``` The message body
-- ```isHtml:``` Define if the body is html
 
-*Note: multiple adresses can be passed with ';' separation*
+| Property | Description | Type |
+| --- | --- | --- |
+| `from` | The origin email adress. | String |
+| `fromName` | The origin name. | String |
+| `to` | The destination email address(es). | String |
+| `cc` | The cc email address(es). | String |
+| `subject` | The subject of the message. | String |
+| `body` | The message body. | String |
+| `isHtml` | Define if the body is html. | Boolean |
+
+*Note: multiple adresses can be passed with ';' separator*
 ## Auth
 Soon...
 
