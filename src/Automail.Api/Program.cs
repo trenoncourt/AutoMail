@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Automail.Api.Dtos;
+using Automail.Api.Dtos.Requests;
 using Automail.Api.Extensions;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
@@ -16,8 +16,6 @@ namespace Automail.Api
 {
     public class Program
     {
-        private static AppSettings _appSettings;
-
         public static void Main()
         {
             IConfigurationRoot config = new ConfigurationBuilder()

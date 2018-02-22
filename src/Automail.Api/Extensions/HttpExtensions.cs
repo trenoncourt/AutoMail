@@ -1,39 +1,55 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Automail.Api.Extensions
 {
-    public static class HttpExtensions
+    public static class HttpJsonExtensions
     {
-        private static readonly JsonSerializer Serializer = new JsonSerializer();
-        
-        public static Task WriteJson<T>(this HttpResponse response, T obj)
+        private static readonly JsonSerializer JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        });
+
+        public static async Task WriteResponseBodyAsync(this HttpContext httpContext, object value)
         {
-            response.ContentType = "application/json";
-            return response.WriteAsync(JsonConvert.SerializeObject(obj));
+            httpContext.Response.ContentType = "application/json";
+            using (var writer = new HttpResponseStreamWriter(httpContext.Response.Body, Encoding.UTF8))
+            {
+                using (var jsonWriter = new JsonTextWriter(writer) { CloseOutput = false, AutoCompleteOnClose = false })
+                {
+                    JsonSerializer.Serialize(jsonWriter, value);
+                }
+                await writer.FlushAsync();
+            }
         }
  
         public static async Task<T> ReadFromJson<T>(this HttpContext httpContext)
         {
             using (var streamReader = new StreamReader(httpContext.Request.Body))
-            using (var jsonTextReader = new JsonTextReader(streamReader))
             {
-                var obj = Serializer.Deserialize<T>(jsonTextReader);
- 
-                var results = new List<ValidationResult>();
-                if (Validator.TryValidateObject(obj, new ValidationContext(obj), results))
+                using (var jsonTextReader = new JsonTextReader(streamReader) { CloseInput = false })
                 {
-                    return obj;
+                    var model = JsonSerializer.Deserialize<T>(jsonTextReader);
+
+                    var results = new List<ValidationResult>();
+                    if (Validator.TryValidateObject(model, new ValidationContext(model), results))
+                    {
+                        return model;
+                    }
+
+                    httpContext.Response.StatusCode = 400;
+                    await httpContext.WriteResponseBodyAsync(results);
+
+                    return default(T);
                 }
- 
-                httpContext.Response.StatusCode = 400;
-                await httpContext.Response.WriteJson(results);
- 
-                return default(T);
             }
         }
     }

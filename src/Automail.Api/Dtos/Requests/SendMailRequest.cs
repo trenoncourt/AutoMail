@@ -1,4 +1,4 @@
-﻿namespace Automail.Api.Dtos
+﻿namespace Automail.Api.Dtos.Requests
 {
     public class SendMailRequest
     {
