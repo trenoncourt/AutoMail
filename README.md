@@ -1,8 +1,10 @@
 # AutoMail
-AutoMail is a tiny REST API to send mails based on the [MailKit](https://github.com/jstedfast/MailKit) library.
+> A tiny .net core microservice to send mails ready in 30 seconds.
+
+AutoMail is a tiny API to send mails based on the [MailKit](https://github.com/jstedfast/MailKit) library.
 
 ## Installation
-Download the [last release](https://github.com/trenoncourt/AutoMail/releases) and place it on your server.
+Download the [last release](https://github.com/trenoncourt/AutoMail/releases), drop it to your server and that's it!
 
 ## Configuration
 All the configuration can be made in environment variable or appsettings.json file :
