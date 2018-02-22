@@ -48,9 +48,9 @@ Sends an email.
 
 | Property | Description | Type |
 | --- | --- | --- |
-| `from` | The origin email adress. | String |
+| `from` | (**Required, can be omitted if user is in settings**) The origin email adress. | String |
 | `fromName` | The origin name. | String |
-| `to` | The destination email address(es). | String |
+| `to` | (**Required**) The destination email address(es). | String |
 | `cc` | The cc email address(es). | String |
 | `subject` | The subject of the message. | String |
 | `body` | The message body. | String |
