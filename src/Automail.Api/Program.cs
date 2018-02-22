@@ -63,13 +63,13 @@ namespace Automail.Api
                             try
                             {
                                 var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                                if (body == null || !body.IsValid())
+                                if (body == null || !body.IsValid(appSettings))
                                 {
                                     context.Response.StatusCode = 400;
                                     return;
                                 }
                                 
-                                var emailMessage = body.ToMimeMessage();
+                                var emailMessage = body.ToMimeMessage(appSettings);
                                 await emailMessage.SendAsync(appSettings);
                                 context.Response.StatusCode = 204;
                             }

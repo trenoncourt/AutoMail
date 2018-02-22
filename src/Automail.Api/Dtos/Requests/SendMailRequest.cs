@@ -40,10 +40,10 @@ namespace Automail.Api.Dtos.Requests
 
     public static class SendMailRequestExtensions
     {
-        public static MimeMessage ToMimeMessage(this SendMailRequest dto)
+        public static MimeMessage ToMimeMessage(this SendMailRequest dto, AppSettings settings)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress(dto.FromName ?? dto.From, dto.From));
+            emailMessage.From.Add(new MailboxAddress(dto.FromName ?? dto.From ?? settings.Smtp.User, dto.From ?? settings.Smtp.User));
             emailMessage.To.AddAdresses(dto.To);
             emailMessage.Cc.AddAdresses(dto.Cc);
             emailMessage.Subject = dto.Subject;
@@ -51,9 +51,9 @@ namespace Automail.Api.Dtos.Requests
             return emailMessage;
         }
 
-        public static bool IsValid(this SendMailRequest dto)
+        public static bool IsValid(this SendMailRequest dto, AppSettings settings)
         {
-            return !string.IsNullOrEmpty(dto.To) && !string.IsNullOrEmpty(dto.From);
+            return !string.IsNullOrEmpty(dto.To) && (!string.IsNullOrEmpty(dto.From) || !string.IsNullOrEmpty(settings.Smtp.User));
         }
     }
 }
