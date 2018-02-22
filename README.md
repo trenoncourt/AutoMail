@@ -26,6 +26,8 @@ All the configuration can be made in environment variable or appsettings.json fi
 | Smtp.`Password`     | The password to authenticate                  | String      |               |
 | Smtp.`Security`     | The security to use (None, Auto, Tls or Ssl)  | String      | None          |
 | Smtp.`LocalDomain`  | The local domain used in the HELO or EHLO     | String      |               |
+| **Server**          | Server settings                               | Object      |               |
+| Server.`UseIIS`     | Adds IIS integration if you're using it       | Boolean     | false         |
 
 Exemple of appsettings.json
 ```json
