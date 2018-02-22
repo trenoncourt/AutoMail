@@ -16,6 +16,8 @@ namespace Automail.Api
 {
     public class Program
     {
+        private static AppSettings _appSettings;
+
         public static void Main()
         {
             IConfigurationRoot config = new ConfigurationBuilder()
@@ -24,18 +26,26 @@ namespace Automail.Api
                 .AddEnvironmentVariables().Build();
             AppSettings appSettings = config.Get<AppSettings>();
 
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .ConfigureLogging(loggerFactory =>
+            var builder = new WebHostBuilder();
+
+            if (appSettings?.Server?.UseIIS == true)
+            {
+                builder.UseIISIntegration();
+            }
+
+            var host = builder.UseKestrel()
+                .ConfigureLogging((hostingContext, loggerFactory) =>
                 {
-                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                    loggerFactory.AddConfiguration(config.GetSection("Logging"));
+                    if (hostingContext.HostingEnvironment.IsDevelopment())
+                    {
                         loggerFactory.AddConsole();
+                    }
                 })
                 .ConfigureServices(services =>
                 {
                     services.AddRouting();
-                    if (appSettings.Cors.Enabled)
+                    if (appSettings?.Cors?.Enabled == true)
                     {
                         services.AddCors();
                     }

@@ -7,6 +7,8 @@ namespace Automail.Api
         public CorsSettings Cors { get; set; }
 
         public SmtpSettings Smtp { get; set; }
+
+        public ServerSettings Server { get; set; }
     }
 
     public class CorsSettings
@@ -50,5 +52,10 @@ namespace Automail.Api
                 }
             }
         }
+    }
+
+    public class ServerSettings
+    {
+        public bool UseIIS { get; set; }
     }
 }
