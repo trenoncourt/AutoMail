@@ -9,6 +9,8 @@ namespace Automail.Api
         public SmtpSettings Smtp { get; set; }
 
         public ServerSettings Server { get; set; }
+
+        public bool KeepConnection { get; set; }
     }
 
     public class CorsSettings

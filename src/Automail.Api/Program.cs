@@ -2,6 +2,7 @@
 using System.IO;
 using Automail.Api.Dtos.Requests;
 using Automail.Api.Extensions;
+using MailKit;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,7 +47,10 @@ namespace Automail.Api
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddRouting();
+                    services
+                        .AddRouting()
+                        .AddSingleton(appSettings)
+                        .AddSingleton<Services.MailService>();
                     if (appSettings?.Cors?.Enabled == true)
                     {
                         services.AddCors();
@@ -68,9 +72,10 @@ namespace Automail.Api
                                     context.Response.StatusCode = 400;
                                     return;
                                 }
-                                
+
                                 var emailMessage = body.ToMimeMessage(appSettings);
-                                await emailMessage.SendAsync(appSettings);
+                                var mailService = context.RequestServices.GetService<Services.MailService>();
+                                await mailService.SendAsync(emailMessage);
                                 context.Response.StatusCode = 204;
                             }
                             catch (Exception e)
