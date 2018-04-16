@@ -50,7 +50,7 @@ namespace Automail.Api
                     services
                         .AddRouting()
                         .AddSingleton(appSettings)
-                        .AddSingleton<Services.MailService>();
+                        .AddScoped<Services.MailService>();
                     if (appSettings?.Cors?.Enabled == true)
                     {
                         services.AddCors();

@@ -17,7 +17,7 @@ namespace Automail.Api.Services
 
         public async Task SendAsync(MimeMessage message)
         {
-            if (!_smtpClient.IsAuthenticated)
+            if (!_smtpClient.IsAuthenticated || !_smtpClient.IsConnected)
             {
                 _smtpClient.LocalDomain = _settings.Smtp.LocalDomain;
                 await _smtpClient.ConnectAsync(_settings.Smtp.Host, _settings.Smtp.Port, _settings.Smtp.SecureSocketOptions).ConfigureAwait(false);
