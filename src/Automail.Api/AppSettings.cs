@@ -11,6 +11,10 @@ namespace Automail.Api
         public ServerSettings Server { get; set; }
 
         public bool KeepConnection { get; set; }
+
+        public bool WriteToMsSqlServer { get; set; }
+
+        public string ConnectionString { get; set; }
     }
 
     public class CorsSettings
