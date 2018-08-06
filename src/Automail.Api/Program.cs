@@ -43,14 +43,6 @@ namespace Automail.Api
             }
 
             var host = builder.UseKestrel()
-//                .ConfigureLogging((hostingContext, loggerFactory) =>
-//                {
-//                    loggerFactory.AddConfiguration(config.GetSection("Logging"));
-//                    if (hostingContext.HostingEnvironment.IsDevelopment())
-//                    {
-//                        loggerFactory.AddConsole();
-//                    }
-//                })
                 .UseSerilog((context, configuration) =>
                 {
                     configuration
@@ -90,7 +82,6 @@ namespace Automail.Api
                 {
                     services
                         .AddRouting()
-                        .AddSingleton(appSettings)
                         .AddScoped<Services.MailService>();
                     if (appSettings?.Cors?.Enabled == true)
                     {
@@ -103,32 +94,38 @@ namespace Automail.Api
 
                     app.UseRouter(r =>
                     {
-                        r.MapPost("send", async context =>
+                        if (appSettings?.Providers == null) return;
+                        
+                        foreach (var provider in appSettings?.Providers)
                         {
-                            ILogger logger = context.RequestServices.GetService<ILogger<Program>>();
-                            try
+                            string basePath = string.IsNullOrEmpty(provider.Path) ? "" : $"{provider.Path}/";
+                            r.MapPost($"{basePath}send", async context =>
                             {
-                                var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                                if (body == null || !body.IsValid(appSettings))
+                                ILogger logger = context.RequestServices.GetService<ILogger<Program>>();
+                                try
                                 {
-                                    context.Response.StatusCode = 400;
-                                    return;
+                                    var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
+                                    if (body == null || !body.IsValid(provider.Smtp))
+                                    {
+                                        context.Response.StatusCode = 400;
+                                        return;
+                                    }
+
+                                    var emailMessage = body.ToMimeMessage(provider.Smtp);
+                                    var mailService = context.RequestServices.GetService<Services.MailService>();
+                                    await mailService.SendAsync(emailMessage, provider);
+                                    logger.LogInformation("mail sent: {From} {To} {Cc} {Subject} {Body}", body.From, body.To, body.Cc, body.Subject, body.Body);
+                                    context.Response.StatusCode = 204;
+                                }
+                                catch (Exception e)
+                                {
+                                    context.Response.StatusCode = 500;
+                                    logger.LogError(e, e.Message);
+                                    await context.Response.WriteAsync("{\"error\": \"" + e.Message + "\"}");
                                 }
 
-                                var emailMessage = body.ToMimeMessage(appSettings);
-                                var mailService = context.RequestServices.GetService<Services.MailService>();
-                                await mailService.SendAsync(emailMessage);
-                                logger.LogInformation("mail sent: {From} {To} {Cc} {Subject} {Body}", body.From, body.To, body.Cc, body.Subject, body.Body);
-                                context.Response.StatusCode = 204;
-                            }
-                            catch (Exception e)
-                            {
-                                context.Response.StatusCode = 500;
-                                logger.LogError(e, e.Message);
-                                await context.Response.WriteAsync("{\"error\": \"" + e.Message + "\"}");
-                            }
-
-                        });
+                            });
+                        }
                     });
                 })
                 .Build();

@@ -1,4 +1,5 @@
-﻿using MailKit.Security;
+﻿using System.Collections.Generic;
+using MailKit.Security;
 
 namespace Automail.Api
 {
@@ -6,11 +7,9 @@ namespace Automail.Api
     {
         public CorsSettings Cors { get; set; }
 
-        public SmtpSettings Smtp { get; set; }
+        public IEnumerable<ProviderSettings> Providers { get; set; }
 
         public ServerSettings Server { get; set; }
-
-        public bool KeepConnection { get; set; }
 
         public bool WriteToMsSqlServer { get; set; }
 
@@ -26,6 +25,15 @@ namespace Automail.Api
         public string Origins { get; set; }
 
         public string Headers { get; set; }
+    }
+
+    public class ProviderSettings
+    {
+        public string Path { get; set; }
+
+        public bool KeepConnection { get; set; }
+
+        public SmtpSettings Smtp { get; set; }
     }
 
     public class SmtpSettings
@@ -69,7 +77,16 @@ namespace Automail.Api
     {
         public static bool IsValid(this AppSettings settings)
         {
-            return !string.IsNullOrEmpty(settings.Smtp.Host) && settings.Smtp.Port != 0;
+            if (settings.Providers == null) return false;
+            foreach (var provider in settings.Providers)
+            {
+                if (string.IsNullOrEmpty(provider.Smtp.Host) || provider.Smtp.Port == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -6,28 +6,26 @@ namespace Automail.Api.Services
 {
     public class MailService
     {
-        private readonly AppSettings _settings;
         private readonly SmtpClient _smtpClient;
         
-        public MailService(AppSettings settings)
+        public MailService()
         {
-            _settings = settings;
             _smtpClient = new SmtpClient();
         }
 
-        public async Task SendAsync(MimeMessage message)
+        public async Task SendAsync(MimeMessage message, ProviderSettings settings)
         {
             if (!_smtpClient.IsAuthenticated || !_smtpClient.IsConnected)
             {
-                _smtpClient.LocalDomain = _settings.Smtp.LocalDomain;
-                await _smtpClient.ConnectAsync(_settings.Smtp.Host, _settings.Smtp.Port, _settings.Smtp.SecureSocketOptions).ConfigureAwait(false);
-                if (_settings.Smtp.User != null && _settings.Smtp.Password != null)
+                _smtpClient.LocalDomain = settings.Smtp.LocalDomain;
+                await _smtpClient.ConnectAsync(settings.Smtp.Host, settings.Smtp.Port, settings.Smtp.SecureSocketOptions).ConfigureAwait(false);
+                if (settings.Smtp.User != null && settings.Smtp.Password != null)
                 {
-                    _smtpClient.Authenticate(_settings.Smtp.User, _settings.Smtp.Password);
+                    _smtpClient.Authenticate(settings.Smtp.User, settings.Smtp.Password);
                 }
             }
             await _smtpClient.SendAsync(message).ConfigureAwait(false);
-            if (!_settings.KeepConnection)
+            if (!settings.KeepConnection)
             {
                 await _smtpClient.DisconnectAsync(true).ConfigureAwait(false);
             }
