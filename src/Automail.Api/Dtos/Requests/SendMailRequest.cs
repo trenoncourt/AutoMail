@@ -1,4 +1,8 @@
-﻿using Automail.Api.Extensions;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Automail.Api.Extensions;
+using Microsoft.AspNetCore.Http;
 using MimeKit;
 
 namespace Automail.Api.Dtos.Requests
@@ -36,6 +40,8 @@ namespace Automail.Api.Dtos.Requests
         /// Define if mail is html.
         /// </summary>
         public bool IsHtml { get; set; }
+
+        public IEnumerable<IFormFile> Files { get; set; }
     }
 
     public static class SendMailRequestExtensions
@@ -43,11 +49,26 @@ namespace Automail.Api.Dtos.Requests
         public static MimeMessage ToMimeMessage(this SendMailRequest dto, SmtpSettings settings)
         {
             var emailMessage = new MimeMessage();
+            if (dto.Files != null && dto.Files.Any())
+            {
+                var multipart = new Multipart("mixed");
+                multipart.Add(new TextPart(dto.IsHtml ? "html" : "plain") { Text = dto.Body });
+                foreach (IFormFile file in dto.Files)
+                {
+                    Stream stream = new MemoryStream();
+                    file.CopyTo(stream);
+                    multipart.Add(new MimePart {Content = new MimeContent(stream), FileName = file.FileName});
+                }
+                emailMessage.Body = multipart;
+            }
+            else
+            {
+                emailMessage.Body = new TextPart(dto.IsHtml ? "html" : "plain") {Text = dto.Body};
+            }
             emailMessage.From.Add(new MailboxAddress(dto.FromName ?? dto.From ?? settings.User, dto.From ?? settings.User));
             emailMessage.To.AddAdresses(dto.To);
             emailMessage.Cc.AddAdresses(dto.Cc);
             emailMessage.Subject = dto.Subject;
-            emailMessage.Body = new TextPart(dto.IsHtml ? "html" : "plain") { Text = dto.Body };
             return emailMessage;
         }
 

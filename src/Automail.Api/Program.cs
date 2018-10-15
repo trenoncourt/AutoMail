@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -104,7 +105,22 @@ namespace Automail.Api
                                 ILogger logger = context.RequestServices.GetService<ILogger<Program>>();
                                 try
                                 {
-                                    var body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
+                                    if (!context.HasAuthorizedContentType())
+                                    {
+                                        context.Response.StatusCode = 400;
+                                        return;
+                                    }
+
+                                    SendMailRequest body;
+                                    if (context.Request.HasFormContentType)
+                                    {
+                                        body = JsonConvert.DeserializeObject<SendMailRequest>(context.Request.Form["data"].ToString());
+                                        body.Files = context.Request.Form.Files;
+                                    }
+                                    else
+                                    {
+                                        body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
+                                    }
                                     if (body == null || !body.IsValid(provider.Smtp))
                                     {
                                         context.Response.StatusCode = 400;
