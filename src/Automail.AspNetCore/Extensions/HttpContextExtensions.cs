@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Automail.Api.Extensions
+namespace Automail.AspNetCore.Extensions
 {
     public static class HttpContextExtensions
     {

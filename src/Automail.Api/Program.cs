@@ -1,25 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
-using Automail.Api.Dtos.Requests;
 using Automail.Api.Extensions;
-using MailKit;
-using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.Builder;
+using Automail.AspNetCore.Extensions;
+using Automail.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MimeKit;
-using Newtonsoft.Json;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Automail.Api
 {
@@ -42,38 +29,13 @@ namespace Automail.Api
             {
                 builder.UseIISIntegration();
             }
-
+            
             var host = builder.UseKestrel()
                 .UseSerilog((context, configuration) =>
                 {
                     configuration
-                            .MinimumLevel.Information()
-                        .ReadFrom.Configuration(context.Configuration)
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Fatal);
-                    if (appSettings?.WriteToMsSqlServer == true)
-                    {
-                        // TODO: wait for next release of serilog-sinks-mssqlserver to get configuration config
-                        // ref: https://github.com/serilog/serilog-sinks-mssqlserver
-                        var columnOptions = new ColumnOptions();
-                        columnOptions.Store.Remove(StandardColumn.MessageTemplate);
-                        columnOptions.Store.Remove(StandardColumn.Properties);
-                        columnOptions.Store.Remove(StandardColumn.Message);
-                        columnOptions.Store.Remove(StandardColumn.Level);
-                        columnOptions.TimeStamp.ColumnName = "TimeStamp";
-                        columnOptions.TimeStamp.ConvertToUtc = true;
-                        columnOptions.Exception.ColumnName = "Exception";
-                        columnOptions.AdditionalDataColumns = new List<DataColumn>
-                        {
-                            new DataColumn("From", typeof(string)),
-                            new DataColumn("To", typeof(string)),
-                            new DataColumn("Cc", typeof(string)),
-                            new DataColumn("Subject", typeof(string)),
-                            new DataColumn("Body", typeof(string))
-                        };
-                        
-                        configuration.WriteTo.MSSqlServer(appSettings.ConnectionString, "Logs",
-                            columnOptions: columnOptions, autoCreateSqlTable: true);
-                    }
+                        .MinimumLevel.Information()
+                        .ReadFrom.Configuration(context.Configuration);
                     if (context.HostingEnvironment.IsDevelopment())
                     {
                         configuration.WriteTo.Console();
@@ -81,9 +43,7 @@ namespace Automail.Api
                 })
                 .ConfigureServices(services =>
                 {
-                    services
-                        .AddRouting()
-                        .AddScoped<Services.MailService>();
+                    services.AddAutomail(config);
                     if (appSettings?.Cors?.Enabled == true)
                     {
                         services.AddCors();
@@ -92,57 +52,7 @@ namespace Automail.Api
                 .Configure(app =>
                 {
                     app.ConfigureCors(appSettings);
-
-                    app.UseRouter(r =>
-                    {
-                        if (appSettings?.Providers == null) return;
-                        
-                        foreach (var provider in appSettings?.Providers)
-                        {
-                            string basePath = string.IsNullOrEmpty(provider.Path) ? "" : $"{provider.Path}/";
-                            r.MapPost($"{basePath}send", async context =>
-                            {
-                                ILogger logger = context.RequestServices.GetService<ILogger<Program>>();
-                                try
-                                {
-                                    if (!context.HasAuthorizedContentType())
-                                    {
-                                        context.Response.StatusCode = 400;
-                                        return;
-                                    }
-
-                                    SendMailRequest body;
-                                    if (context.Request.HasFormContentType)
-                                    {
-                                        body = JsonConvert.DeserializeObject<SendMailRequest>(context.Request.Form["data"].ToString());
-                                        body.Files = context.Request.Form.Files;
-                                    }
-                                    else
-                                    {
-                                        body = await context.Request.HttpContext.ReadFromJson<SendMailRequest>();
-                                    }
-                                    if (body == null || !body.IsValid(provider.Smtp))
-                                    {
-                                        context.Response.StatusCode = 400;
-                                        return;
-                                    }
-
-                                    var emailMessage = body.ToMimeMessage(provider.Smtp);
-                                    var mailService = context.RequestServices.GetService<Services.MailService>();
-                                    await mailService.SendAsync(emailMessage, provider);
-                                    logger.LogInformation("mail sent: {From} {To} {Cc} {Subject} {Body}", body.From, body.To, body.Cc, body.Subject, body.Body);
-                                    context.Response.StatusCode = 204;
-                                }
-                                catch (Exception e)
-                                {
-                                    context.Response.StatusCode = 500;
-                                    logger.LogError(e, e.Message);
-                                    await context.Response.WriteAsync("{\"error\": \"" + e.Message + "\"}");
-                                }
-
-                            });
-                        }
-                    });
+                    app.UseAutomail();
                 })
                 .Build();
 

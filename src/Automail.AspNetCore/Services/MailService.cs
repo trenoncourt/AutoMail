@@ -2,7 +2,7 @@
 using MimeKit;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
-namespace Automail.Api.Services
+namespace Automail.AspNetCore.Services
 {
     public class MailService
     {

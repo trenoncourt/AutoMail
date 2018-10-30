@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automail.Api", "src\Automail.Api\Automail.Api.csproj", "{D1344242-551D-4AF1-8888-F7393EBB5BE1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automail.AspNetCore", "src\Automail.AspNetCore\Automail.AspNetCore.csproj", "{76FEA685-9E6A-446C-B32C-45081F041676}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6EEAAEEB-E4C4-4E3E-AC07-F9FFEAA8F119}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +19,16 @@ Global
 		{D1344242-551D-4AF1-8888-F7393EBB5BE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1344242-551D-4AF1-8888-F7393EBB5BE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1344242-551D-4AF1-8888-F7393EBB5BE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76FEA685-9E6A-446C-B32C-45081F041676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76FEA685-9E6A-446C-B32C-45081F041676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76FEA685-9E6A-446C-B32C-45081F041676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76FEA685-9E6A-446C-B32C-45081F041676}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D1344242-551D-4AF1-8888-F7393EBB5BE1} = {6EEAAEEB-E4C4-4E3E-AC07-F9FFEAA8F119}
+		{76FEA685-9E6A-446C-B32C-45081F041676} = {6EEAAEEB-E4C4-4E3E-AC07-F9FFEAA8F119}
 	EndGlobalSection
 EndGlobal

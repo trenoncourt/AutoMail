@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Automail.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 
 namespace Automail.Api.Extensions
 {

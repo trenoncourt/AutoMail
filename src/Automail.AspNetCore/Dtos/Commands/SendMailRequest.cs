@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Automail.Api.Extensions;
+using Automail.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Http;
 using MimeKit;
 
-namespace Automail.Api.Dtos.Requests
+namespace Automail.AspNetCore.Dtos.Commands
 {
-    public class SendMailRequest
+    public class SendMailCommand
     {
         /// <summary>
         /// Sender email adress.
@@ -46,7 +46,7 @@ namespace Automail.Api.Dtos.Requests
 
     public static class SendMailRequestExtensions
     {
-        public static MimeMessage ToMimeMessage(this SendMailRequest dto, SmtpSettings settings)
+        public static MimeMessage ToMimeMessage(this SendMailCommand dto, SmtpSettings settings)
         {
             var emailMessage = new MimeMessage();
             if (dto.Files != null && dto.Files.Any())
@@ -72,7 +72,7 @@ namespace Automail.Api.Dtos.Requests
             return emailMessage;
         }
 
-        public static bool IsValid(this SendMailRequest dto, SmtpSettings settings)
+        public static bool IsValid(this SendMailCommand dto, SmtpSettings settings)
         {
             return !string.IsNullOrEmpty(dto.To) && (!string.IsNullOrEmpty(dto.From) || !string.IsNullOrEmpty(settings.User));
         }

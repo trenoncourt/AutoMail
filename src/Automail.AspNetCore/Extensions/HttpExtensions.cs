@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Automail.Api.Extensions
+namespace Automail.AspNetCore.Extensions
 {
     public static class HttpJsonExtensions
     {

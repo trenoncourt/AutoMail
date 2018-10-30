@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using MimeKit;
 
-namespace Automail.Api.Extensions
+namespace Automail.AspNetCore.Extensions
 {
     public static class InternetAddressListExtensions
     {
