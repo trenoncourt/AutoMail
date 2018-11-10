@@ -23,7 +23,8 @@ namespace Automail.AspNetCore.Extensions
                 
                 foreach (var provider in settings?.Providers)
                 {
-                    string basePath = string.IsNullOrEmpty(provider.Path) ? "" : $"{provider.Path}/";
+                    string defaultPath = settings.Path ?? "";
+                    string basePath = string.IsNullOrEmpty(provider.Path) ? defaultPath : $"{defaultPath}/{provider.Path}/";
                     r.MapPost($"{basePath}send", async context =>
                     {
                         var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
