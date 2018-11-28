@@ -66,6 +66,8 @@ namespace Automail.AspNetCore.Dtos.Commands
                 emailMessage.Body = new TextPart(dto.IsHtml ? "html" : "plain") {Text = dto.Body};
             }
             emailMessage.From.Add(new MailboxAddress(dto.FromName ?? dto.From ?? settings.User, dto.From ?? settings.User));
+            emailMessage.Sender = new MailboxAddress(dto.FromName ?? dto.From ?? settings.User, dto.From ?? settings.User);
+            emailMessage.ReplyTo.Add(new MailboxAddress(dto.FromName ?? dto.From ?? settings.User, dto.From ?? settings.User));
             emailMessage.To.AddAdresses(dto.To);
             emailMessage.Cc.AddAdresses(dto.Cc);
             emailMessage.Subject = dto.Subject;
