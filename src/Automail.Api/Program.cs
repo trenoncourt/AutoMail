@@ -19,10 +19,6 @@ namespace Automail.Api
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables().Build();
             AppSettings appSettings = config.Get<AppSettings>();
-            if (!appSettings.IsValid())
-            {
-                throw new Exception("Please add all mandatory fields in settings.");
-            }
 
             IWebHostBuilder builder = new WebHostBuilder().SuppressStatusMessages(true);
             if (appSettings?.Server?.UseIIS == true)

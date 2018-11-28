@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Automail.AspNetCore.Dtos.Commands;
 using MimeKit;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace Automail.AspNetCore.Services
 {
-    public class MailService
+    public class MailService : IMailService
     {
         private readonly SmtpClient _smtpClient;
         
@@ -13,8 +14,9 @@ namespace Automail.AspNetCore.Services
             _smtpClient = new SmtpClient();
         }
 
-        public async Task SendAsync(MimeMessage message, ProviderSettings settings)
+        public async Task SendAsync(SendMailCommand mailDto, ProviderSettings settings)
         {
+            var message = mailDto.ToMimeMessage(settings.Smtp);
             if (!_smtpClient.IsAuthenticated || !_smtpClient.IsConnected)
             {
                 _smtpClient.LocalDomain = settings.Smtp.LocalDomain;

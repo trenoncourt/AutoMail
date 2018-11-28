@@ -28,6 +28,32 @@ namespace Automail.AspNetCore
         public bool KeepConnection { get; set; }
 
         public SmtpSettings Smtp { get; set; }
+
+        public string Name { get; set; }
+
+        public string Type { get; set; }
+
+        public string ClientId { get; set; }
+
+        public string ClientSecret { get; set; }
+
+        public string DefaultFrom { get; set; }
+
+        public AutomailType AutomailType
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case "Smtp":
+                        return AutomailType.Smtp;
+                    case "MsGraph":
+                        return AutomailType.MsGraph;
+                    default:
+                        return AutomailType.Smtp;
+                }
+            }
+        }
     }
 
     public class SmtpSettings
@@ -65,5 +91,11 @@ namespace Automail.AspNetCore
     public class ServerSettings
     {
         public bool UseIIS { get; set; }
+    }
+
+    public enum AutomailType
+    {
+        Smtp,
+        MsGraph
     }
 }

@@ -52,9 +52,17 @@ namespace Automail.AspNetCore.Extensions
                                 return;
                             }
 
-                            var emailMessage = body.ToMimeMessage(provider.Smtp);
-                            var mailService = context.RequestServices.GetService<MailService>();
-                            await mailService.SendAsync(emailMessage, provider);
+                            IMailService mailService;
+                            if (provider.AutomailType == AutomailType.MsGraph)
+                            {
+                                mailService = context.RequestServices.GetService<MsGraphMailService>();
+                            } 
+                            else
+                            {
+                                mailService = context.RequestServices.GetService<MailService>();
+                            }
+                             
+                            await mailService.SendAsync(body, provider);
                             logger.LogInformation("mail sent: {From} {To} {Cc} {Subject} {Body}", body.From, body.To, body.Cc, body.Subject, body.Body);
                             context.Response.StatusCode = 204;
                         }
