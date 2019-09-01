@@ -47,7 +47,7 @@ namespace Automail.AspNetCore.Extensions
                             {
                                 body = await context.Request.HttpContext.ReadFromJson<SendMailCommand>();
                             }
-                            if (body == null || !body.IsValid(provider.Smtp))
+                            if (body == null || !body.IsValid(provider))
                             {
                                 context.Response.StatusCode = 400;
                                 return;

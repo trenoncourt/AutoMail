@@ -32,7 +32,14 @@ namespace Automail.AspNetCore.Services
             
             if (token == null || token.HasExpired)
             {
-                token = await _authService.GetTokenAsync();
+                token = await _authService.GetTokenAsync(new AzureAdOptions
+                {
+                    Tenant = settings.Tenant,
+                    ClientId = settings.ClientId,
+                    ClientSecret = settings.ClientSecret,
+                    Instance = "https://login.microsoftonline.com/",
+                    GraphResource = "https://graph.microsoft.com"
+                });
                 _memoryCache.Set(cacheTokenName, token);
             }
 

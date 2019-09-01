@@ -33,6 +33,8 @@ namespace Automail.AspNetCore
 
         public string Type { get; set; }
 
+        public string Tenant { get; set; }
+
         public string ClientId { get; set; }
 
         public string ClientSecret { get; set; }

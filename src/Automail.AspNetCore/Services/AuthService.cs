@@ -14,15 +14,16 @@ namespace Automail.AspNetCore.Services
             _azureAdOptions = azureAdOptions.Value;
         }
 
-        public Task<Token> GetTokenAsync()
+        public Task<Token> GetTokenAsync(AzureAdOptions azureAdOptions = null)
         {
-            return $"{_azureAdOptions.Instance}{_azureAdOptions.Tenant}/oauth2/token"
+            azureAdOptions = azureAdOptions ?? _azureAdOptions;
+            return $"{azureAdOptions.Instance}{azureAdOptions.Tenant}/oauth2/token"
                 .PostUrlEncodedAsync(new
                 {
-                    client_id = _azureAdOptions.ClientId,
-                    client_secret = _azureAdOptions.ClientSecret,
+                    client_id = azureAdOptions.ClientId,
+                    client_secret = azureAdOptions.ClientSecret,
                     grant_type = "client_credentials",
-                    resource = _azureAdOptions.GraphResource
+                    resource = azureAdOptions.GraphResource
                 })
                 .ReceiveJson<Token>();
         }

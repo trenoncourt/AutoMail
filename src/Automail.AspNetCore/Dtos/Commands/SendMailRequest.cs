@@ -74,9 +74,9 @@ namespace Automail.AspNetCore.Dtos.Commands
             return emailMessage;
         }
 
-        public static bool IsValid(this SendMailCommand dto, SmtpSettings settings)
+        public static bool IsValid(this SendMailCommand dto, ProviderSettings settings)
         {
-            return !string.IsNullOrEmpty(dto.To) && (!string.IsNullOrEmpty(dto.From) || !string.IsNullOrEmpty(settings.User));
+            return !string.IsNullOrEmpty(dto.To) && (!string.IsNullOrEmpty(dto.From) || !string.IsNullOrEmpty(settings.DefaultFrom));
         }
     }
 }
